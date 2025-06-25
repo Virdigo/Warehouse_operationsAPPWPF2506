@@ -60,7 +60,7 @@ namespace Warehouse_operationsAPPWPF.Pages
                 }
                 else
                 {
-                    MessageBox.Show("Invalid login or password");
+                    MessageBox.Show("Неправильный логин или пароль");
                 }
             }
             catch (Exception ex)
