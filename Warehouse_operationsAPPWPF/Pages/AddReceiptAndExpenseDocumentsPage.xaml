@@ -34,14 +34,20 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
+                <!-- Дата с календарем -->
                 <TextBlock Text="Дата:" FontSize="14" Foreground="#3b5998" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
-                <TextBox Name="DataTextBox" Grid.Row="0" Grid.Column="1" Width="250" Height="40"/>
+                <DatePicker Name="DataDatePicker" Grid.Row="0" Grid.Column="1" Width="250" Height="40" />
 
+                <!-- Тип документа -->
                 <TextBlock Text="Тип документа:" FontSize="14" Foreground="#3b5998" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
-                <TextBox Name="ReceiptAndexpense_documentsTextBox" Grid.Row="1" Grid.Column="1" Width="250" Height="40"/>
+                <ComboBox Name="ReceiptAndExpenseDocumentsComboBox" Grid.Row="1" Grid.Column="1" Width="250" Height="40">
+                    <ComboBoxItem Content="Приход" />
+                    <ComboBoxItem Content="Расход" />
+                </ComboBox>
 
+                <!-- ID Пользователя -->
                 <TextBlock Text="ID Пользователя:" FontSize="14" Foreground="#3b5998" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
-                <TextBox Name="UserIdTextBox" Grid.Row="2" Grid.Column="1" Width="200" Height="40" PreviewTextInput="FilterTextBox_PreviewTextInput"/>
+                <ComboBox Name="UsersComboBox" Grid.Row="2" Grid.Column="1" Width="250" Height="40"/>
 
                 <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,20,0,0" HorizontalAlignment="Center">
                     <Button Content="Сохранить" Click="SaveButton_Click" Background="#3b5998" Foreground="White" Width="120" Margin="10"/>

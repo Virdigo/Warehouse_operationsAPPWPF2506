@@ -37,25 +37,28 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
+                <!-- Поле ID продукта (ComboBox) -->
                 <TextBlock Text="ID продукта:" FontSize="14" Foreground="#3b5998" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center"/>
-                <TextBox Name="ProductIdTextBox" Grid.Row="0" Grid.Column="1" Width="200" PreviewTextInput="FilterTextBox_PreviewTextInput"/>
+                <ComboBox Name="ProductComboBox" Grid.Row="0" Grid.Column="1" Width="200" Height="40"/>
 
+                <!-- Поле Количество -->
                 <TextBlock Text="Количество:" FontSize="14" Foreground="#3b5998" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
                 <TextBox Name="QuantityTextBox" Grid.Row="1" Grid.Column="1" Width="100" PreviewTextInput="FilterTextBox_PreviewTextInput"/>
 
+                <!-- Поле ID документа -->
                 <TextBlock Text="ID документа:" FontSize="14" Foreground="#3b5998" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center"/>
-                <TextBox Name="DocumentIdTextBox" Grid.Row="2" Grid.Column="1" Width="200" PreviewTextInput="FilterTextBox_PreviewTextInput"/>
+                <ComboBox Name="DocumentComboBox" Grid.Row="2" Grid.Column="1" Width="200" Height="40"/>
 
-                <TextBlock Text="ID поставщика:" FontSize="14" Foreground="#3b5998" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center"/>
-                <TextBox Name="SupplierIdTextBox" Grid.Row="3" Grid.Column="1" Width="200" PreviewTextInput="FilterTextBox_PreviewTextInput"/>
+                <!-- Поле Поставщик (ComboBox) -->
+                <TextBlock Text="Поставщик:" FontSize="14" Foreground="#3b5998" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center"/>
+                <ComboBox Name="SupplierComboBox" Grid.Row="3" Grid.Column="1" Width="200" Height="40"/>
 
+                <!-- Поле Цена -->
                 <TextBlock Text="Цена ₽:" FontSize="14" Foreground="#3b5998" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center"/>
                 <TextBox Name="PriceTextBox" Grid.Row="4" Grid.Column="1" Width="120" PreviewTextInput="FilterTextBox_PreviewTextInput"/>
 
-                <!--<TextBlock Text="Цена ₽:" FontSize="14" Foreground="#3b5998" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center"/>
-                <TextBox Name="PriceTextBox" Grid.Row="5" Grid.Column="1" Width="120" PreviewTextInput="FilterTextBox_PreviewTextInput"/>-->
 
-                <StackPanel Orientation="Horizontal" Grid.Row="6" Grid.ColumnSpan="2" Margin="0,20,0,0" HorizontalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Grid.Row="7" Grid.ColumnSpan="2" Margin="0,20,0,0" HorizontalAlignment="Center">
                     <Button Content="Сохранить" Click="SaveButton_Click" Background="#3b5998" Foreground="White" Width="120" Margin="10"/>
                     <Button Content="Назад" Click="BackButton_Click" Background="#888" Foreground="White" Width="100" Margin="10"/>
                 </StackPanel>

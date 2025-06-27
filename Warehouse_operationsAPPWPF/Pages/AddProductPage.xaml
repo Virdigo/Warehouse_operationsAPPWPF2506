@@ -46,10 +46,10 @@
                 <TextBox Name="VendorCodeTextBox" Grid.Row="2" Grid.Column="1" Width="200" Height="40" />
 
                 <TextBlock Text="Тип продукта:" FontSize="14" Foreground="#3b5998" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center"/>
-                <TextBox  Name="ProductTypeIdTextBox" Grid.Row="3" Grid.Column="1" Width="150" Height="40" PreviewTextInput="FilterTextBox_PreviewTextInput"/>
+                <ComboBox Name="ProductTypeComboBox" Grid.Row="3" Grid.Column="1" Width="200" Height="40" />
 
                 <TextBlock Text="Единица измерения:" FontSize="14" Foreground="#3b5998" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center"/>
-                <TextBox  Name="UnitIdTextBox" Grid.Row="4" Grid.Column="1" Width="150" Height="40" PreviewTextInput="FilterTextBox_PreviewTextInput"/>
+                <ComboBox Name="UnitComboBox" Grid.Row="4" Grid.Column="1" Width="200" Height="40" />
 
                 <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.ColumnSpan="2" Margin="0,20,0,0" HorizontalAlignment="Center">
                     <Button Content="Сохранить" Click="SaveButton_Click" Background="#3b5998" Foreground="White" Width="120" Margin="10"/>

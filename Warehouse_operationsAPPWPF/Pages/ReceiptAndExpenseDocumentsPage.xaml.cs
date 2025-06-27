@@ -31,11 +31,14 @@ namespace Warehouse_operationsAPPWPF.Pages
     {
         private readonly ApiServiceReceiptAndExpenseDocuments _apiService;
         private List<Receipt_and_expense_documents> _allReceiptAndExpenseDocuments;
+        private readonly int _documentId;
+
         public ReceiptAndExpenseDocumentsPage()
         {
             InitializeComponent();
             _apiService = new ApiServiceReceiptAndExpenseDocuments();
             LoadReceiptAndExpenseDocuments();
+
         }
         private async void LoadDocuments_Click(object sender, RoutedEventArgs e)
         {
@@ -238,5 +241,6 @@ namespace Warehouse_operationsAPPWPF.Pages
                 window.ShowDialog();
             }
         }
+        
     }
 }

@@ -46,5 +46,18 @@ namespace Warehouse_operationsAPPWPF.Services
             var response = await _httpClient.DeleteAsync($"DELETE/{productId}");
             response.EnsureSuccessStatusCode();
         }
+        internal async Task<List<Product_type>> GetProductTypesAsync()
+        {
+            var response = await _httpClient.GetAsync("https://localhost:7034/api/Product_type/");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<Product_type>>();
+        }
+
+        internal async Task<List<Unit>> GetUnitsAsync()
+        {
+            var response = await _httpClient.GetAsync("http://localhost:5093/api/Unit/");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<Unit>>();
+        }
     }
 }

@@ -24,6 +24,8 @@ namespace Warehouse_operationsAPPWPF.Pages
     {
         private readonly ApiServiceProduct _apiService;
         private readonly Product _product;
+        private List<Product_type> _productTypes;
+        private List<Unit> _units;
 
         internal AddProductPage(Product product = null)
         {
@@ -31,12 +33,50 @@ namespace Warehouse_operationsAPPWPF.Pages
             _apiService = new ApiServiceProduct();
             _product = product ?? new Product();
 
-            // Заполнение текстовых полей текущими значениями продукта
+            // Загружаем справочники
+            LoadProductTypes();
+            LoadUnits();
+
+            // Заполнение текстовых полей
             NameTextBox.Text = _product.Name;
             PriceTextBox.Text = _product.Price.ToString();
             VendorCodeTextBox.Text = _product.vendor_code;
-            ProductTypeIdTextBox.Text = _product.id_product_type.ToString();
-            UnitIdTextBox.Text = _product.id_unit.ToString();
+        }
+        private async void LoadProductTypes()
+        {
+            try
+            {
+                _productTypes = await _apiService.GetProductTypesAsync();
+                ProductTypeComboBox.ItemsSource = _productTypes;
+                ProductTypeComboBox.DisplayMemberPath = "Name";
+                ProductTypeComboBox.SelectedValuePath = "id_product_type";
+
+                // Устанавливаем выбранное значение при редактировании
+                if (_product.id_product_type != 0)
+                    ProductTypeComboBox.SelectedValue = _product.id_product_type;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки типов продуктов: {ex.Message}");
+            }
+        }
+
+        private async void LoadUnits()
+        {
+            try
+            {
+                _units = await _apiService.GetUnitsAsync();
+                UnitComboBox.ItemsSource = _units;
+                UnitComboBox.DisplayMemberPath = "Name";
+                UnitComboBox.SelectedValuePath = "id_unit";
+
+                if (_product.id_unit != 0)
+                    UnitComboBox.SelectedValue = _product.id_unit;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка загрузки единиц измерения: {ex.Message}");
+            }
         }
         private void FilterTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
@@ -50,8 +90,9 @@ namespace Warehouse_operationsAPPWPF.Pages
                 _product.Name = NameTextBox.Text;
                 _product.Price = int.Parse(PriceTextBox.Text);
                 _product.vendor_code = VendorCodeTextBox.Text;
-                _product.id_product_type = int.Parse(ProductTypeIdTextBox.Text);
-                _product.id_unit = int.Parse(UnitIdTextBox.Text);
+
+                _product.id_product_type = (int)(ProductTypeComboBox.SelectedValue ?? 0);
+                _product.id_unit = (int)(UnitComboBox.SelectedValue ?? 0);
 
                 if (_product.id_Product == 0)
                 {

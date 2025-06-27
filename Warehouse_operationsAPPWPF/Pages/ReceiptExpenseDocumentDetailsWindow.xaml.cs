@@ -1,4 +1,4 @@
-﻿using System;
+﻿    using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,13 +22,25 @@ namespace Warehouse_operationsAPPWPF.Pages
     public partial class ReceiptExpenseDocumentDetailsWindow : Window
     {
         private readonly ApiServiceInformation _infoService = new ApiServiceInformation();
+        private readonly int _documentId;
 
         public ReceiptExpenseDocumentDetailsWindow(int idDoc)
         {
             InitializeComponent();
+            _documentId = idDoc;
             LoadInformationByDocumentId(idDoc);
         }
-
+        private async Task<Receipt_and_expense_documents> GetReceiptAndExpenseDocumentById()
+        {
+            var apiService = new ApiServiceReceiptAndExpenseDocuments();
+            var all = await apiService.GetReceiptAndExpenseDocumentsList();
+            return all.FirstOrDefault(d => d.id_doc == _documentId);
+        }
+        private async Task<List<Receipt_and_expense_documents>> GetReceiptAndExpenseDocuments()
+        {
+            var apiService = new ApiServiceReceiptAndExpenseDocuments();
+            return await apiService.GetReceiptAndExpenseDocumentsList();
+        }
         private async void LoadInformationByDocumentId(int idDoc)
         {
             try
@@ -46,7 +58,7 @@ namespace Warehouse_operationsAPPWPF.Pages
         {
             this.Close();
         }
-        private void PrintDocument()
+        private async Task PrintDocument()
         {
             var items = DetailsListView.ItemsSource.Cast<Information_about_documents>().ToList();
             if (items == null || !items.Any())
@@ -55,81 +67,159 @@ namespace Warehouse_operationsAPPWPF.Pages
                 return;
             }
 
+            var documentInfo = await GetReceiptAndExpenseDocumentById();
+            if (documentInfo == null)
+            {
+                MessageBox.Show("Документ не найден.");
+                return;
+            }
+
+            // Создание документа
             FlowDocument doc = new FlowDocument
             {
-                PagePadding = new Thickness(50),
+                PagePadding = new Thickness(30),
                 FontFamily = new FontFamily("Segoe UI"),
-                FontSize = 12,
+                FontSize = 11,
                 ColumnWidth = double.PositiveInfinity
             };
 
-            // Шапка
-            Paragraph title = new Paragraph(new Run("ТОВАРНАЯ НАКЛАДНАЯ"))
+            // Заголовок
+            doc.Blocks.Add(new Paragraph(new Run("ТОВАРНАЯ НАКЛАДНАЯ"))
             {
                 FontSize = 18,
                 FontWeight = FontWeights.Bold,
                 TextAlignment = TextAlignment.Center,
                 Margin = new Thickness(0, 0, 0, 20)
-            };
-            doc.Blocks.Add(title);
+            });
 
+            // Документ № и дата
+            Table headerTable = new Table();
+            headerTable.Columns.Add(new TableColumn());
+            headerTable.Columns.Add(new TableColumn());
+            headerTable.RowGroups.Add(new TableRowGroup());
+            TableRow headerRow = new TableRow();
+            headerRow.Cells.Add(new TableCell(new Paragraph(new Run($"Номер документа: {_documentId}"))));
+            headerRow.Cells.Add(new TableCell(new Paragraph(new Run($"Дата составления: {documentInfo.date:dd.MM.yyyy}"))));
+            headerTable.RowGroups[0].Rows.Add(headerRow);
+            doc.Blocks.Add(headerTable);
+
+            // Пользователь и тип
+            doc.Blocks.Add(new Paragraph(new Run($"Тип документа: {(documentInfo.ReceiptAndexpense_documents ? "Приход" : "Расход")}")));
+            doc.Blocks.Add(new Paragraph(new Run($"Пользователь: {documentInfo.UsersName}")));
             doc.Blocks.Add(new Paragraph(new Run($"Дата печати: {DateTime.Now:dd.MM.yyyy HH:mm}")));
-            doc.Blocks.Add(new Paragraph(new Run($"Количество позиций: {items.Count}")));
+
+            doc.Blocks.Add(new Paragraph(new Run("\nПеречень товаров:"))
+            {
+                FontWeight = FontWeights.Bold,
+                FontSize = 13,
+                Margin = new Thickness(0, 20, 0, 10)
+            });
 
             // Таблица
             Table table = new Table();
-            doc.Blocks.Add(table);
-
-            int columns = 6;
+            int columns = 9;
             for (int i = 0; i < columns; i++)
                 table.Columns.Add(new TableColumn());
-
             table.RowGroups.Add(new TableRowGroup());
 
             // Заголовок таблицы
-            TableRow headerRow = new TableRow();
-            table.RowGroups[0].Rows.Add(headerRow);
-            headerRow.Cells.Add(new TableCell(new Paragraph(new Bold(new Run("№")))));
-            headerRow.Cells.Add(new TableCell(new Paragraph(new Bold(new Run("Товар")))));
-            headerRow.Cells.Add(new TableCell(new Paragraph(new Bold(new Run("Поставщик")))));
-            headerRow.Cells.Add(new TableCell(new Paragraph(new Bold(new Run("Кол-во")))));
-            headerRow.Cells.Add(new TableCell(new Paragraph(new Bold(new Run("Цена")))));
-            headerRow.Cells.Add(new TableCell(new Paragraph(new Bold(new Run("Сумма")))));
-
-            foreach (var cell in headerRow.Cells)
-                cell.Padding = new Thickness(5);
+            TableRow head = new TableRow();
+            string[] headers = new[]
+            {
+    "№", "Наименование товара", "Ед. изм.", "Кол-во", "Цена, руб.",
+    "Сумма без НДС", "НДС %", "Сумма НДС", "Сумма с НДС"
+};
+            foreach (var h in headers)
+            {
+                var cell = new TableCell(new Paragraph(new Bold(new Run(h))))
+                {
+                    Padding = new Thickness(4),
+                    BorderBrush = Brushes.Black,
+                    BorderThickness = new Thickness(0.5)
+                };
+                head.Cells.Add(cell);
+            }
+            table.RowGroups[0].Rows.Add(head);
 
             // Данные
-            int index = 1;
+            int idx = 1;
+            decimal totalWithoutNds = 0, totalNds = 0, totalWithNds = 0;
             foreach (var item in items)
             {
+                decimal price = item.Price;
+                int qty = item.Quanity;
+                decimal total = item.Cost;
+                decimal withoutNds = Math.Round(total / 1.18m, 2);
+                decimal nds = Math.Round(total - withoutNds, 2);
+                decimal withNds = withoutNds + nds;
+
                 TableRow row = new TableRow();
-                table.RowGroups[0].Rows.Add(row);
-                row.Cells.Add(new TableCell(new Paragraph(new Run(index.ToString()))));
+                row.Cells.Add(new TableCell(new Paragraph(new Run(idx.ToString()))));
                 row.Cells.Add(new TableCell(new Paragraph(new Run(item.ProductName))));
-                row.Cells.Add(new TableCell(new Paragraph(new Run(item.SuppliersName))));
-                row.Cells.Add(new TableCell(new Paragraph(new Run(item.Quanity.ToString()))));
-                row.Cells.Add(new TableCell(new Paragraph(new Run(item.Price.ToString("C2")))));
-                row.Cells.Add(new TableCell(new Paragraph(new Run(item.Cost.ToString("C2")))));
+                row.Cells.Add(new TableCell(new Paragraph(new Run("шт"))));
+                row.Cells.Add(new TableCell(new Paragraph(new Run(qty.ToString()))));
+                row.Cells.Add(new TableCell(new Paragraph(new Run(price.ToString("F2")))));
+                row.Cells.Add(new TableCell(new Paragraph(new Run(withoutNds.ToString("F2")))));
+                row.Cells.Add(new TableCell(new Paragraph(new Run("18%"))));
+                row.Cells.Add(new TableCell(new Paragraph(new Run(nds.ToString("F2")))));
+                row.Cells.Add(new TableCell(new Paragraph(new Run(withNds.ToString("F2")))));
 
                 foreach (var cell in row.Cells)
-                    cell.Padding = new Thickness(5);
+                {
+                    cell.Padding = new Thickness(3);
+                    cell.BorderBrush = Brushes.Black;
+                    cell.BorderThickness = new Thickness(0.5);
+                }
 
-                index++;
+                table.RowGroups[0].Rows.Add(row);
+
+                totalWithoutNds += withoutNds;
+                totalNds += nds;
+                totalWithNds += withNds;
+                idx++;
             }
 
-            // Подвал
-            doc.Blocks.Add(new Paragraph(new Run("\n\nОтветственное лицо: ________________________\n"))
+            // Итого строка
+            TableRow totalRow = new TableRow();
+            totalRow.Cells.Add(new TableCell(new Paragraph(new Bold(new Run("ИТОГО"))) { TextAlignment = TextAlignment.Center })
             {
-                Margin = new Thickness(0, 30, 0, 0)
+                ColumnSpan = 5,
+                BorderBrush = Brushes.Black,
+                BorderThickness = new Thickness(0.5),
+                Padding = new Thickness(3)
+            });
+            totalRow.Cells.Add(new TableCell(new Paragraph(new Run(totalWithoutNds.ToString("F2")))));
+            totalRow.Cells.Add(new TableCell(new Paragraph(new Run("18%"))));
+            totalRow.Cells.Add(new TableCell(new Paragraph(new Run(totalNds.ToString("F2")))));
+            totalRow.Cells.Add(new TableCell(new Paragraph(new Run(totalWithNds.ToString("F2")))));
+
+            foreach (var cell in totalRow.Cells)
+            {
+                cell.Padding = new Thickness(3);
+                cell.BorderBrush = Brushes.Black;
+                cell.BorderThickness = new Thickness(0.5);
+            }
+
+            table.RowGroups[0].Rows.Add(totalRow);
+            doc.Blocks.Add(table);
+
+            // Итоги текстом
+            doc.Blocks.Add(new Paragraph(new Run($"\nВсего отпущено на сумму: {totalWithNds:C2}"))
+            {
+                FontWeight = FontWeights.Bold,
+                Margin = new Thickness(0, 20, 0, 0)
             });
 
+            // Подписи
+            doc.Blocks.Add(new Paragraph(new Run("Ответственное лицо: ________________________")));
+            doc.Blocks.Add(new Paragraph(new Run("Подпись: ________________________")));
+
             // Печать
-            PrintDialog printDialog = new PrintDialog();
-            if (printDialog.ShowDialog() == true)
+            PrintDialog dlg = new PrintDialog();
+            if (dlg.ShowDialog() == true)
             {
                 IDocumentPaginatorSource idpSource = doc;
-                printDialog.PrintDocument(idpSource.DocumentPaginator, "Печать накладной");
+                dlg.PrintDocument(idpSource.DocumentPaginator, "Печать товарной накладной");
             }
         }
 
